@@ -2,16 +2,13 @@
 
 namespace DoubleA\LaravelInit\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
 class Init extends Command
 {
-    const INIT_OPTIONS = [
-        "Fetch updates and start from scratch (Removes all data)",
-        "Fetch updates and keep going from where you were (No data will be removed)",
-    ];
-
     /**
      * The name and signature of the console command.
      *
@@ -35,73 +32,58 @@ class Init extends Command
     {
         $selectedOption = $this->askHowTheInitShouldBe();
 
-        $this->updateProject();
-        $this->preServeConfigurations();
-        switch ($selectedOption) {
-            case self::INIT_OPTIONS[0]:
-                $this->question('Making Database Ready');
-                $this->execCommand('php artisan migrate:fresh --seed');
-                $this->serve();
-                break;
-            case self::INIT_OPTIONS[1]:
-                $this->question('Making Database Ready');
-                $this->execCommand('php artisan migrate');
-                $this->serve();
-                break;
-        }
+        $this->alert('Running default steps');
+        $this->execCommands(config('init.default_steps'));
+
+        $this->newLine();
+
+        $this->alert('Running extra steps');
+        $this->execCommands($selectedOption['extra_steps']);
+
+        $this->serve();
 
         return CommandAlias::SUCCESS;
     }
 
     public function askHowTheInitShouldBe(): array|string
     {
-        $answer = $this->choice('Welcome Developer, What do want to do?', self::INIT_OPTIONS);
+        $options = config('init.options');
 
-        if ($answer == self::INIT_OPTIONS[0]) {
-            $confirm = $this->confirm('This will delete everything on database, Are you sure about this?');
+        $answer = $this->choice(
+            'Welcome Developer, What do want to do?',
+            Arr::pluck($options, 'title')
+        );
+
+        $options = collect(config('init.options'));
+        $selectedOption = $options->where('title', $answer)->first();
+
+        if ($selectedOption['confirm_needed']) {
+            $confirm = $this->confirm('Are you sure about this?');
             if (!$confirm) {
                 $this->askHowTheInitShouldBe();
             }
         }
 
-        return $answer;
+        return $selectedOption;
     }
 
-    public function updateProject()
+    public function execCommands(array $commands): void
     {
-        $this->alert("Fetching latest codes...");
-        $this->execCommand('git pull');
+        foreach ($commands as $command) {
 
-        $this->alert("Installing Dependencies...");
-        $this->execCommand('composer install');
-        $this->info("Project is up to date and dependencies are installed!");
-        $this->newLine();
-    }
-
-    public function preServeConfigurations()
-    {
-        $this->alert("Bootstrapping Project...");
-
-        $this->question('Generating Key');
-        $this->execCommand('php artisan key:generate');
-
-        $this->question('Linking Storage');
-        $this->execCommand('php artisan storage:link');
-
-        $this->question('Re-Cache Necessary Configs');
-        $this->execCommand('php artisan cache:clear');
-        $this->execCommand('php artisan config:clear');
-    }
-
-    public function execCommand(string $command)
-    {
-        exec('cd ' . base_path() . ' && ' . $command, $output);
-        foreach ($output as $line) {
-            $this->line($line);
+            $output = [];
+            $this->info('Running ' . $command . ' ...');
+            exec('cd ' . base_path() . ' && ' . $command, $output, $return);
+            if ($return !== 0) {
+                $this->error('Error in running command: ' . $command);
+            }
+            foreach ($output as $line) {
+                $this->line($line);
+            }
         }
     }
 
-    public function serve()
+    public function serve(): void
     {
         $this->alert('Project is Ready and available on '. config('app.url'));
         $this->info('Build Something Amazing! :D');

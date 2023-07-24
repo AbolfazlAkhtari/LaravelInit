@@ -24,6 +24,8 @@ class InitServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->publishes([
+            __DIR__.'/../config/init.php' =>  config_path('init.php'),
+        ], 'config');
     }
 }
