@@ -35,14 +35,18 @@ class Init extends Command
     {
         $selectedOption = $this->askHowTheInitShouldBe();
 
+        $this->updateProject();
+        $this->preServeConfigurations();
         switch ($selectedOption) {
             case self::INIT_OPTIONS[0]:
-                $this->RunWithFreshDB();
-                $this->runServe();
+                $this->question('Making Database Ready');
+                $this->execCommand('php artisan migrate:fresh --seed');
+                $this->serve();
                 break;
             case self::INIT_OPTIONS[1]:
-                $this->updateWithoutFreshDB();
-                $this->runServe();
+                $this->question('Making Database Ready');
+                $this->execCommand('php artisan migrate');
+                $this->serve();
                 break;
         }
 
@@ -63,127 +67,41 @@ class Init extends Command
         return $answer;
     }
 
-    public function RunWithFreshDB(): void
+    public function updateProject()
     {
         $this->alert("Fetching latest codes...");
-        $this->runGitPull();
+        $this->execCommand('git pull');
 
         $this->alert("Installing Dependencies...");
-        $this->runComposerInstall();
-
+        $this->execCommand('composer install');
         $this->info("Project is up to date and dependencies are installed!");
         $this->newLine();
+    }
+
+    public function preServeConfigurations()
+    {
         $this->alert("Bootstrapping Project...");
 
         $this->question('Generating Key');
-        $this->runKeyGenerate();
+        $this->execCommand('php artisan key:generate');
 
         $this->question('Linking Storage');
-        $this->runStorageLink();
+        $this->execCommand('php artisan storage:link');
 
-        $this->question('Re-Cache Necessary Caches');
-        $this->runCacheClear();
-        $this->runConfigClear();
-
-        $this->question('Making Database Ready');
-        $this->runMigrateFreshAndSeed();
+        $this->question('Re-Cache Necessary Configs');
+        $this->execCommand('php artisan cache:clear');
+        $this->execCommand('php artisan config:clear');
     }
 
-
-    public function updateWithoutFreshDB(): void
+    public function execCommand(string $command)
     {
-        $this->alert("Fetching latest codes...");
-        $this->runGitPull();
-
-        $this->alert("Installing Dependencies...");
-        $this->runComposerInstall();
-
-        $this->info("Project is up to date and dependencies are installed!");
-
-        $this->alert("Bootstrapping Project...");
-
-        $this->question('Re-Cache Necessary Caches');
-        $this->runCacheClear();
-        $this->runConfigClear();
-
-        $this->question('Making Database Ready');
-        $this->runMigrate();
-    }
-
-
-    public function runGitPull()
-    {
-        exec('cd ' . base_path() . ' && ' . 'git pull', $gitOutput);
-        foreach ($gitOutput as $line) {
+        exec('cd ' . base_path() . ' && ' . $command, $output);
+        foreach ($output as $line) {
             $this->line($line);
         }
     }
 
-    public function runComposerInstall()
-    {
-        exec('cd ' . base_path() . ' && ' . 'composer install', $composerOutput);
-        foreach ($composerOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runKeyGenerate()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan key:generate', $generateKeyOutput);
-        foreach ($generateKeyOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runStorageLink()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan storage:link', $storageLinkOutput);
-        foreach ($storageLinkOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runCacheClear()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan cache:clear', $cacheClearOutput);
-        foreach ($cacheClearOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runConfigClear()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan config:clear', $configClearOutput);
-        foreach ($configClearOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runMigrateFreshAndSeed()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan migrate:fresh --seed', $migrateAndSeedOutput);
-        foreach ($migrateAndSeedOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runMigrate()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan migrate', $migrateOutput);
-        foreach ($migrateOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runPassportInstall()
-    {
-        exec('cd ' . base_path() . ' && ' . 'php artisan passport:install', $passportInstallOutput);
-        foreach ($passportInstallOutput as $line) {
-            $this->line($line);
-        }
-    }
-
-    public function runServe()
+    public function serve()
     {
         $this->alert('Project is Ready and available on '. config('app.url'));
         $this->info('Build Something Amazing! :D');
