@@ -1,0 +1,16 @@
+{
+    "name": "double-a/laravel-init",
+    "description": "Making php artisan init command to make project initializing easy",
+    "autoload": {
+        "psr-4": {
+            "DoubleA\\LaravelInit\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Abolfazl Akhtari",
+            "email": "abolfazl.akhtari42@gmail.com"
+        }
+    ],
+    "require": {}
+}
