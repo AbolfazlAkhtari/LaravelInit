@@ -15,17 +15,17 @@ return [
             "confirm_needed" => true,
             "extra_steps" => [
                 "php artisan migrate:fresh --seed"
-            ]
+            ],
+            "serve" => false,
         ],
         [
             "title" => "Fetch updates and keep going from where you were (No data will be removed)",
             "confirm_needed" => false,
             "extra_steps" => [
                 "php artisan migrate"
-            ]
+            ],
+            "serve" => true,
+            "serve_port" => 8000, // optional - default : 8000 - not required if serve equals false
         ],
-    ],
-    "final_steps" => [
-        "php artisan serve"
     ],
 ];

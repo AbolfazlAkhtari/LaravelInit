@@ -40,7 +40,9 @@ class Init extends Command
         $this->alert('Running extra steps');
         $this->execCommands($selectedOption['extra_steps']);
 
-        $this->serve();
+        if ($selectedOption['serve'] ?? false) {
+            $this->serve($selectedOption['serve_port'] ?? Env::get('SERVER_PORT', 8000));
+        }
 
         return CommandAlias::SUCCESS;
     }
@@ -83,10 +85,11 @@ class Init extends Command
         }
     }
 
-    public function serve(): void
+    public function serve($port): void
     {
-        $this->alert('Project is Ready and available on '. config('app.url'));
+        $host = Env::get('SERVER_HOST', '127.0.0.1');
+        $this->alert("Project is Ready and available on [http://{$host}:{$port}]");
         $this->info('Build Something Amazing! :D');
-        exec('cd ' . base_path() . ' && ' . 'php artisan serve');
+        exec('cd ' . base_path() . ' && ' . 'php artisan serve --port=' . $port);
     }
 }
