@@ -5,6 +5,7 @@ namespace DoubleA\LaravelInit\Console\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Env;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
 class Init extends Command
