@@ -2,9 +2,7 @@
 
 namespace DoubleA\LaravelInit\Console\Commands;
 
-use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Env;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
@@ -32,7 +30,7 @@ class Init extends Command
     public function handle(): int
     {
         $selectedOption = $this->askHowTheInitShouldBe();
-
+dd($selectedOption);
         $this->alert('Running default steps');
         $this->execCommands(config('init.default_steps'));
 
@@ -50,20 +48,19 @@ class Init extends Command
 
     public function askHowTheInitShouldBe(): array|string
     {
-        $options = config('init.options');
+        $options = collect(config('init.options'));
 
         $answer = $this->choice(
             'Welcome Developer, What do want to do?',
-            Arr::pluck($options, 'title')
+            $options->pluck('title')->toArray()
         );
 
-        $options = collect(config('init.options'));
         $selectedOption = $options->where('title', $answer)->first();
 
         if ($selectedOption['confirm_needed']) {
             $confirm = $this->confirm('Are you sure about this?');
             if (!$confirm) {
-                $this->askHowTheInitShouldBe();
+                return $this->askHowTheInitShouldBe();
             }
         }
 

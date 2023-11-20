@@ -12,5 +12,7 @@
             "email": "abolfazl.akhtari42@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "laravel/framework": "^10.10"
+    }
 }
