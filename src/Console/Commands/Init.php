@@ -2,6 +2,7 @@
 
 namespace DoubleA\LaravelInit\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Env;
 use Symfony\Component\Console\Command\Command as CommandAlias;
@@ -26,11 +27,12 @@ class Init extends Command
      * Execute the console command.
      *
      * @return int
+     * @throws Exception
      */
     public function handle(): int
     {
         $selectedOption = $this->askHowTheInitShouldBe();
-dd($selectedOption);
+
         $this->alert('Running default steps');
         $this->execCommands(config('init.default_steps'));
 
@@ -67,6 +69,9 @@ dd($selectedOption);
         return $selectedOption;
     }
 
+    /**
+     * @throws Exception
+     */
     public function execCommands(array $commands): void
     {
         foreach ($commands as $command) {
@@ -75,7 +80,11 @@ dd($selectedOption);
             $this->info('Running ' . $command . ' ...');
             exec('cd ' . base_path() . ' && ' . $command, $output, $return);
             if ($return !== 0) {
-                $this->error('Error in running command: ' . $command);
+                if (config('init.continue_on_error')) {
+                    $this->error('Error in running command: ' . $command);
+                } else {
+                    throw new Exception('Error in running command: ' . $command);
+                }
             }
             foreach ($output as $line) {
                 $this->line($line);

@@ -9,6 +9,7 @@ return [
         "php artisan cache:clear",
         "php artisan config:clear",
     ],
+
     "options" => [
         [
             "title" => "Fetch updates and start from scratch (Removes all data)",
@@ -28,4 +29,6 @@ return [
             "serve_port" => 8000, // optional - default : 8000 - not required if serve equals false
         ],
     ],
+
+    "continue_on_error" => false,
 ];
