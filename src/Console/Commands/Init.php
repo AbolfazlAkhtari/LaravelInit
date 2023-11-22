@@ -76,9 +76,8 @@ class Init extends Command
     {
         foreach ($commands as $command) {
 
-            $output = [];
             $this->info('Running ' . $command . ' ...');
-            exec('cd ' . base_path() . ' && ' . $command, $output, $return);
+            passthru('cd ' . base_path() . ' && ' . $command, $return);
             if ($return !== 0) {
                 if (config('init.continue_on_error')) {
                     $this->error('Error in running command: ' . $command);
@@ -86,16 +85,13 @@ class Init extends Command
                     throw new Exception('Error in running command: ' . $command);
                 }
             }
-            foreach ($output as $line) {
-                $this->line($line);
-            }
         }
     }
 
     public function serve($port): void
     {
         $host = Env::get('SERVER_HOST', '127.0.0.1');
-        $this->alert("Project is Ready and available on [http://{$host}:{$port}]");
+        $this->alert("Project is Ready and available on [$host:$port]");
         $this->info('Build Something Amazing! :D');
         exec('cd ' . base_path() . ' && ' . 'php artisan serve --port=' . $port);
     }
