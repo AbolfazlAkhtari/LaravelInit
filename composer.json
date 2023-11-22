@@ -1,6 +1,7 @@
 {
     "name": "double-a/laravel-init",
     "description": "Making php artisan init command to make project initializing easy",
+    "license": ["MIT"],
     "autoload": {
         "psr-4": {
             "DoubleA\\LaravelInit\\": "src/"
@@ -13,6 +14,7 @@
         }
     ],
     "require": {
+        "php": ">=8.2",
         "laravel/framework": "^10.10"
     }
 }
