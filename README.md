@@ -1,4 +1,4 @@
-# Vue Image Hotspot
+# Laravel Init
 
 Tired of running Laravel's command over and over again?
 <br>
