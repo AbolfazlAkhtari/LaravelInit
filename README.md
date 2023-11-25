@@ -47,6 +47,7 @@ return [
 
     // you can define as many options as you wish
     "options" => [
+        [
             "title" => "Fetch updates and start from scratch (Removes all data)",
             
             // it means a secondary confirmation will be asked from the user before proceeding
