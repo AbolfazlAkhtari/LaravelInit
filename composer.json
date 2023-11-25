@@ -16,5 +16,12 @@
     "require": {
         "php": ">=8.2",
         "laravel/framework": ">=8.0.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DoubleA\\LaravelInit\\Providers\\InitServiceProvider"
+            ]
+        }
     }
 }
